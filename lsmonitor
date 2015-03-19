@@ -29,6 +29,8 @@
 #           added monitor power switch. Recognize on / off / auto. Shut down if power switch is in off position.
 #           added monitor function button. Recognize normal or pressed state.
 #           added user defined function, execute on pressed function button, amber led blink fast during script execution
+#           
+#           get up to date file from github: # git clone https://github.com/ari173/lsmonitor.git
 #
 #
 # Copyright (C) 2013 Sergej Wildemann
