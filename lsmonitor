@@ -14,20 +14,21 @@
 # lsmonitor:
 # - handle ls complete power-on
 # - monitor hdd temperature & control fan speed
-# - monitor hdd status & contol function led
+# - monitor hdd status & control function led
 # - monitor power switch
 # - monitor function button
+# - handle pressed function button -> execute user defined script
 #
 # Changelog:
 # - Modified to work with a Debian kernel on a LS-CHLv2
 # - Added hdd status monitoring
 # - Modified to work with a vanilla kernel >= 3.6
 # - Modified to work with a vanilla kernel >= 3.8
-# - 2015.03.14 Modified to work with kernel 3.14 by ari173
-#              update the control interface path
-#              added monitor power switch. Recognize on / off / auto. shut down if power switch is in off position.
-#              added monitor function button. Recognize normal or pressed state.
-#              added user defined function, execute on pressed function button
+# - 2015.03 Modified to work with kernel 3.14 by ari173
+#           update the control interface path
+#           added monitor power switch. Recognize on / off / auto. Shut down if power switch is in off position.
+#           added monitor function button. Recognize normal or pressed state.
+#           added user defined function, execute on pressed function button
 #
 # Copyright (C) 2013 Sergej Wildemann
 ##
@@ -84,13 +85,12 @@ USER_FUNCTION="/path/to/your/script/emergency.sh"
 
 # logging
 do_log() {
-  [ -n "$LOGFILE" ] && echo "`date` $*" >> $LOGFILE
+    [ -n "$LOGFILE" ] && echo "`date` $*" >> $LOGFILE
 }
 
 
 # Set and get current fan speed
-fan_speed()
-{
+fan_speed() {
     if [ $1 = "get" ]; then
         cat $FAN_INPUT
     elif [ $1 = "set" ]; then
@@ -158,7 +158,6 @@ get_function_button_state() {
         echo "pressed"
     fi
 }
-
 
 
 # Monitor HDD temperature & control fan speed
