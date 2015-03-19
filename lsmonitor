@@ -28,7 +28,8 @@
 #           update the control interface path
 #           added monitor power switch. Recognize on / off / auto. Shut down if power switch is in off position.
 #           added monitor function button. Recognize normal or pressed state.
-#           added user defined function, execute on pressed function button
+#           added user defined function, execute on pressed function button, amber led blink fast during script execution
+#
 #
 # Copyright (C) 2013 Sergej Wildemann
 ##
@@ -80,7 +81,6 @@ HDDTEMP1=50
 HDDTEMP2=55
 
 USER_FUNCTION="/path/to/your/script/emergency.sh"
-
 
 
 # logging
@@ -184,13 +184,15 @@ monitor_hdd()
 {
     HDDSTATUS=$(hdparm -C /dev/sda | grep "standby")
     if [ -z "$HDDSTATUS" ]; then
-        echo default-on > $LBFUNC/trigger
+        led_set $LBFUNC on
+        #echo default-on > $LBFUNC/trigger
         if [ $HDDSTATUSOLD -eq 0 ]; then
             do_log "HDD active"
             HDDSTATUSOLD=1
         fi
     else
-        echo none > $LBFUNC/trigger
+        led_set $LBFUNC off
+        #echo none > $LBFUNC/trigger
         if [ $HDDSTATUSOLD -eq 1 ]; then
             do_log "HDD standby"
             HDDSTATUSOLD=0
@@ -232,7 +234,7 @@ lsmonitor_daemon()
                 led_set $LPOWER off
                 led_set $LINFO blink-fast
                 do_log "function button was pressed"
-                if [ -x "$USER_FUNCTION ]; then
+                if [ -x "$USER_FUNCTION" ]; then
                     "$USER_FUNCTION"
                 else
                     do_log "no permission to execute user function $USER_FUNCTION"
