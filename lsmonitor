@@ -26,7 +26,8 @@
 # - 2015.03.14 Modified to work with kernel 3.14 by ari173
 #              update the control interface path
 #              added monitor power switch. Recognize on / off / auto. shut down if power switch is in off position.
-#              added monitor function button. Recognize normal or pressed state. todo: do something if button is pressed
+#              added monitor function button. Recognize normal or pressed state.
+#              added user defined function, execute on pressed function button
 #
 # Copyright (C) 2013 Sergej Wildemann
 ##
@@ -53,11 +54,12 @@ PIDFILE=/var/run/lsmonitor_daemon.pid
 LOGFILE=/var/log/lsmonitor.log
 
 # Control interfaces
-LINFO="/sys/devices/gpio_leds.3/leds/lsxl:amper:info"
-LPOWER="/sys/devices/gpio_leds.3/leds/lsxl:blue:power"
-LBFUNC="/sys/devices/gpio_leds.3/leds/lsxl:blue:func"
-LAFUNC="/sys/devices/gpio_leds.3/leds/lsxl:red:func"
-LALARM="/sys/devices/gpio_leds.3/leds/lsxl:red:alarm"
+LED_DIR="/sys/devices/gpio_leds.3/leds"
+LINFO="lsxl:amber:info"
+LPOWER="lsxl:blue:power"
+LBFUNC="lsxl:blue:func"
+LAFUNC="lsxl:red:func"
+LALARM="lsxl:red:alarm"
 
 FAN_CTRL=/sys/bus/platform/drivers/gpio-fan/gpio_fan.4/hwmon/hwmon0
 FAN_TARGET=${FAN_CTRL}/fan1_target
@@ -76,6 +78,9 @@ HDDTEMP0=45
 HDDTEMP1=50
 HDDTEMP2=55
 
+USER_FUNCTION="/path/to/your/script/emergency.sh"
+
+
 
 # logging
 do_log() {
@@ -93,6 +98,35 @@ fan_speed()
     fi
 }
 
+# set led state
+led_set() {
+  local LED=$1
+  local STATE=$2
+
+  if [ ! -e "$LED_DIR/$LED" ]; then
+    return
+  fi
+  case "$STATE" in
+    on)
+      echo default-on > $LED_DIR/$LED/trigger
+      ;;
+    blink)
+      echo timer > $LED_DIR/$LED/trigger
+      echo 500 > $LED_DIR/$LED/delay_on
+      echo 500 > $LED_DIR/$LED/delay_off
+      ;;
+    blink-fast)
+      echo timer > $LED_DIR/$LED/trigger
+      echo 100 > $LED_DIR/$LED/delay_on
+      echo 100 > $LED_DIR/$LED/delay_off
+      ;;
+    off)
+      echo none > $LED_DIR/$LED/trigger
+      ;;
+    *)
+      ;;
+  esac
+}
 
 # Get power switch state: on / off / auto
 get_power_switch_state() {
@@ -195,8 +229,18 @@ lsmonitor_daemon()
                 # do nothing
                 ;;
             pressed)
+                # amber led blink-fast while user function running
+                led_set $LPOWER off
+                led_set $LINFO blink-fast
                 do_log "function button was pressed"
-                # todo
+                if [ -x "$USER_FUNCTION ]; then
+                    "$USER_FUNCTION"
+                else
+                    do_log "no permission to execute user function $USER_FUNCTION"
+                fi
+                led_set $LINFO off
+                led_set $LPOWER on
+                do_log "user function $USER_FUNCTION returned $?"
                 ;;
         esac
 
@@ -218,9 +262,7 @@ lsmonitor_daemon()
     fan_speed set $SPEED_LOW
 
     # blink power led
-    echo timer > $LPOWER/trigger
-    echo 100   > $LPOWER/delay_on
-    echo 100   > $LPOWER/delay_off
+    led_set $LPOWER blink-fast
 
     # Initiate unit shutdown
     halt
