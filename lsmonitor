@@ -187,14 +187,12 @@ monitor_hdd()
     HDDSTATUS=$(hdparm -C /dev/sda | grep "standby")
     if [ -z "$HDDSTATUS" ]; then
         led_set $LBFUNC on
-        #echo default-on > $LBFUNC/trigger
         if [ $HDDSTATUSOLD -eq 0 ]; then
             do_log "HDD active"
             HDDSTATUSOLD=1
         fi
     else
         led_set $LBFUNC off
-        #echo none > $LBFUNC/trigger
         if [ $HDDSTATUSOLD -eq 1 ]; then
             do_log "HDD standby"
             HDDSTATUSOLD=0
