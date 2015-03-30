@@ -281,6 +281,12 @@ kill_lsmonitor_daemon()
 
 
 # Main
+EVTEST=$(which "evtest")
+if [ -z "$EVTEST" ]; then
+    echo "evtest not found in path, please install to monitor the power switch and the function button"
+    do_log "evtest not found in path, please install to monitor the power switch and the function button"
+    exit 1
+fi
 
 case $1 in
     start)
