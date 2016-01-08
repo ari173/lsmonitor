@@ -29,6 +29,10 @@
 #           added monitor power switch. Recognize on / off / auto. Shut down if power switch is in off position.
 #           added monitor function button. Recognize normal or pressed state.
 #           added user defined function, execute on pressed function button, amber led blink fast during script execution
+# - 2016.01 Modified to work with 3.16.0-4-kirkwood #1 Debian 3.16.7-ckt20-1+deb8u2 (2016-01-02) armv5tel GNU/Linux
+#           maybe you have to add
+#           - /lib/modules/3.16.0-0.bpo.4-kirkwood/kernel/drivers/hwmon/gpio-fan.ko
+#           with command insmod gpio-fan.ko
 #           
 #           get up to date file from github: # git clone https://github.com/ari173/lsmonitor.git
 #
@@ -65,7 +69,7 @@ LBFUNC="lsxl:blue:func"
 LAFUNC="lsxl:red:func"
 LALARM="lsxl:red:alarm"
 
-FAN_CTRL=/sys/bus/platform/drivers/gpio-fan/gpio_fan.4/hwmon/hwmon0
+FAN_CTRL=/sys/bus/platform/drivers/gpio-fan/gpio_fan/hwmon/hwmon0
 FAN_TARGET=${FAN_CTRL}/fan1_target
 FAN_INPUT=${FAN_CTRL}/fan1_input
 
