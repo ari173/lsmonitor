@@ -3,3 +3,5 @@
 - if you want to run on startup as service type: update-rc.d lsmonitor defaults
 - maybe you have to add "gpio-fan" in /etc/modules
 - install evtest and smartmontools type: apt-get install evtest smartmontools
+
+- get up to date file from github: # git clone https://github.com/ari173/lsmonitor.git
