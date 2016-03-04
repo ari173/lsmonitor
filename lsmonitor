@@ -10,40 +10,6 @@
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
 
-#
-# lsmonitor:
-# - handle ls complete power-on
-# - monitor hdd temperature & control fan speed
-# - monitor hdd status & control function led
-# - monitor power switch
-# - monitor function button
-# - handle pressed function button -> execute user defined script
-#
-# Changelog:
-# - Modified to work with a Debian kernel on a LS-CHLv2
-# - Added hdd status monitoring
-# - Modified to work with a vanilla kernel >= 3.6
-# - Modified to work with a vanilla kernel >= 3.8
-# - 2015.03 Modified to work with kernel 3.14 by ari173
-#           update the control interface path
-#           added monitor power switch. Recognize on / off / auto. Shut down if power switch is in off position.
-#           added monitor function button. Recognize normal or pressed state.
-#           added user defined function, execute on pressed function button, amber led blink fast during script execution
-# - 2016.01 Modified to work with 3.16.0-4-kirkwood #1 Debian 3.16.7-ckt20-1+deb8u2 (2016-01-02) armv5tel GNU/Linux
-#           maybe you have to add
-#           - gpio-fan in /etc/modules
-#           
-#           get up to date file from github: # git clone https://github.com/ari173/lsmonitor.git
-#
-#
-# Copyright (C) 2013 Sergej Wildemann
-##
-# Based on:
-#  blstools - Copyright (C) 2010 Michele Manzato
-#
-# Credits:
-#  Thanks to archonfx on Buffalo NAS Central forum for HDD
-#  temperature monitoring command.
 ##
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -61,7 +27,7 @@ PIDFILE=/var/run/lsmonitor_daemon.pid
 LOGFILE=/var/log/lsmonitor.log
 
 # Control interfaces
-LED_DIR="/sys/devices/gpio_leds.3/leds"
+LED_DIR="/sys/devices/gpio_leds/leds"
 LINFO="lsxl:amber:info"
 LPOWER="lsxl:blue:power"
 LBFUNC="lsxl:blue:func"
@@ -86,6 +52,7 @@ HDDTEMP1=50
 HDDTEMP2=55
 
 USER_FUNCTION="/path/to/your/script/emergency.sh"
+USER_FUNCTION_ARGS="your_args_here"
 
 
 # logging
@@ -142,10 +109,12 @@ get_power_switch_state() {
         AUTO=$?
 
         if [ $PWR -eq 0 -a $AUTO -eq 10 ]; then
+            do_log "detect switch in auto position"
             echo auto
         elif [ $PWR -eq 10 -a $AUTO -eq 0 ]; then
             echo on
         elif [ $PWR -eq 0 -a $AUTO -eq 0 ]; then
+            do_log "detect switch in off position"
             echo off
         fi
     fi
@@ -238,7 +207,7 @@ lsmonitor_daemon()
                 led_set $LINFO blink-fast
                 do_log "function button was pressed"
                 if [ -x "$USER_FUNCTION" ]; then
-                    "$USER_FUNCTION"
+                    "$USER_FUNCTION" "$USER_FUNCTION_ARGS"
                 else
                     do_log "no permission to execute user function $USER_FUNCTION"
                 fi
@@ -294,18 +263,26 @@ fi
 case $1 in
     start)
         # Start the lsmonitor daemon
+        do_log "starting ..."
         lsmonitor_daemon &
         echo $! > $PIDFILE
         ;;
     stop)
         # Kill the lsmonitor daemon
+        do_log "stopping ..."
         kill_lsmonitor_daemon
         ;;
     restart)
+        # restart means stop and start
+        do_log "restarting ..."
         $0 stop && sleep 2 && $0 start
         ;;
+    status)
+        # show the status running or not running
+        service lsmonitor status
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart}"
+        echo "Usage: $0 {start|stop|restart|status}"
         exit 2
         ;;
 esac
