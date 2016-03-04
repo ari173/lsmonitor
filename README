@@ -1,4 +1,3 @@
-# lsmonitor
 lsmonitor script for LS-CHL with debian
 
 Based on:
@@ -10,9 +9,10 @@ Credits:
  temperature monitoring command.
 
 
-monitor the power switch and the function button
-check hdd status and temperatur
-set the fan speed
-
-you can define a user function
-this file will be executed if you press the function button
+lsmonitor:
+- handle ls complete power-on
+- monitor hdd temperature & control fan speed
+- monitor hdd status & control function led
+- monitor power switch
+- monitor function button
+- handle pressed function button -> execute user defined script
