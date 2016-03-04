@@ -1,1 +1,11 @@
-
+- Modified to work with a Debian kernel on a LS-CHLv2
+- Added hdd status monitoring
+- Modified to work with a vanilla kernel >= 3.6
+- Modified to work with a vanilla kernel >= 3.8
+- 2015.03 Modified to work with kernel 3.14 by ari173
+          update the control interface path
+          added monitor power switch. Recognize on / off / auto. Shut down if power switch is in off position.
+          added monitor function button. Recognize normal or pressed state.
+          added user defined function, execute on pressed function button, amber led blink fast during script execution
+- 2016.01 Modified to work with 3.16.0-4-kirkwood #1 Debian 3.16.7-ckt20-1+deb8u2 (2016-01-02) armv5tel GNU/Linux
+- 2016.02 Modified to work with 3.16.0-4-kirkwood #1 Debian 3.16.7-ckt20-1+deb8u3 (2016-01-17) armv5tel GNU/Linux
